@@ -82,9 +82,6 @@ describe('db module', () => {
       assert.ok(viewNames.includes('activity_by_workspace'));
       assert.ok(viewNames.includes('activity_by_board'));
       assert.ok(viewNames.includes('event_summary'));
-      assert.ok(viewNames.includes('user_workspace_activity'));
-      assert.ok(viewNames.includes('daily_user_activity'));
-      assert.ok(viewNames.includes('user_board_activity'));
     });
   });
 });

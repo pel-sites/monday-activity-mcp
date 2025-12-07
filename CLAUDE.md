@@ -28,9 +28,6 @@ Check your cwd. Git pull to make sure we are up to date with the latest default 
 - `activity_by_workspace` (workspace_id, workspace_name, total_actions, unique_users, boards_touched, first_action, last_action)
 - `activity_by_board` (board_id, board_name, workspace_name, total_actions, unique_users, items_created, first_action, last_action)
 - `event_summary` (event, count, unique_users, first_occurrence, last_occurrence)
-- `user_workspace_activity` (user_id, workspace_name, actions, first_action, last_action)
-- `daily_user_activity` (day, user_id, actions)
-- `user_board_activity` (user_id, board_id, board_name, workspace_name, actions, items_created, updates, first_action, last_action)
 
 ## TDD Cycle
 

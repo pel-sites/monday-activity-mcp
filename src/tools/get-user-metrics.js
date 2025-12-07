@@ -7,18 +7,16 @@ export function getUserMetrics() {
     .prepare(
       `
       SELECT
-        u.user_id,
-        u.total_actions,
-        u.items_created,
-        COUNT(DISTINCT d.day) as days_active,
-        COUNT(DISTINCT w.workspace_name) as workspaces_touched,
-        COUNT(DISTINCT b.board_id) as boards_touched
-      FROM activity_by_user u
-      LEFT JOIN daily_user_activity d ON u.user_id = d.user_id
-      LEFT JOIN user_workspace_activity w ON u.user_id = w.user_id
-      LEFT JOIN user_board_activity b ON u.user_id = b.user_id
-      GROUP BY u.user_id
-      ORDER BY u.total_actions DESC
+        user_id,
+        COUNT(*) as total_actions,
+        SUM(CASE WHEN event = 'create_pulse' THEN 1 ELSE 0 END) as items_created,
+        COUNT(DISTINCT DATE(created_at)) as days_active,
+        COUNT(DISTINCT workspace_name) as workspaces_touched,
+        COUNT(DISTINCT board_id) as boards_touched
+      FROM activity
+      WHERE user_id IS NOT NULL AND user_id != '' AND user_id != '-4'
+      GROUP BY user_id
+      ORDER BY total_actions DESC
     `
     )
     .all();

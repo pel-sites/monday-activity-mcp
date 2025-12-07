@@ -27,9 +27,9 @@ export function createTestDb() {
     SELECT
       user_id,
       COUNT(*) as total_actions,
-      SUM(CASE WHEN event = 'create_item' THEN 1 ELSE 0 END) as items_created,
-      SUM(CASE WHEN event = 'update_item' THEN 1 ELSE 0 END) as updates,
-      SUM(CASE WHEN event = 'delete_item' THEN 1 ELSE 0 END) as items_deleted,
+      SUM(CASE WHEN event = 'create_pulse' THEN 1 ELSE 0 END) as items_created,
+      SUM(CASE WHEN event = 'update_column_value' THEN 1 ELSE 0 END) as updates,
+      SUM(CASE WHEN event = 'delete_pulse' THEN 1 ELSE 0 END) as items_deleted,
       MIN(created_at) as first_action,
       MAX(created_at) as last_action
     FROM activity
@@ -40,8 +40,8 @@ export function createTestDb() {
       DATE(created_at) as day,
       COUNT(*) as total_actions,
       COUNT(DISTINCT user_id) as unique_users,
-      SUM(CASE WHEN event = 'create_item' THEN 1 ELSE 0 END) as items_created,
-      SUM(CASE WHEN event = 'update_item' THEN 1 ELSE 0 END) as updates
+      SUM(CASE WHEN event = 'create_pulse' THEN 1 ELSE 0 END) as items_created,
+      SUM(CASE WHEN event = 'update_column_value' THEN 1 ELSE 0 END) as updates
     FROM activity
     GROUP BY DATE(created_at);
 
@@ -64,7 +64,7 @@ export function createTestDb() {
       workspace_name,
       COUNT(*) as total_actions,
       COUNT(DISTINCT user_id) as unique_users,
-      SUM(CASE WHEN event = 'create_item' THEN 1 ELSE 0 END) as items_created,
+      SUM(CASE WHEN event = 'create_pulse' THEN 1 ELSE 0 END) as items_created,
       MIN(created_at) as first_action,
       MAX(created_at) as last_action
     FROM activity
@@ -79,38 +79,6 @@ export function createTestDb() {
       MAX(created_at) as last_occurrence
     FROM activity
     GROUP BY event;
-
-    CREATE VIEW user_workspace_activity AS
-    SELECT
-      user_id,
-      workspace_name,
-      COUNT(*) as actions,
-      MIN(created_at) as first_action,
-      MAX(created_at) as last_action
-    FROM activity
-    GROUP BY user_id, workspace_name;
-
-    CREATE VIEW daily_user_activity AS
-    SELECT
-      DATE(created_at) as day,
-      user_id,
-      COUNT(*) as actions
-    FROM activity
-    GROUP BY DATE(created_at), user_id;
-
-    CREATE VIEW user_board_activity AS
-    SELECT
-      user_id,
-      board_id,
-      board_name,
-      workspace_name,
-      COUNT(*) as actions,
-      SUM(CASE WHEN event = 'create_item' THEN 1 ELSE 0 END) as items_created,
-      SUM(CASE WHEN event = 'update_item' THEN 1 ELSE 0 END) as updates,
-      MIN(created_at) as first_action,
-      MAX(created_at) as last_action
-    FROM activity
-    GROUP BY user_id, board_id;
   `);
 
   return db;
@@ -123,13 +91,13 @@ export function seedTestData(db) {
   `);
 
   const testData = [
-    ['2024-01-15T10:00:00Z', 'create_item', 'item', 'user1', 'acc1', 'ws1', 'Workspace A', 'board1', 'Board 1', 'item1', 'Item 1', null, null, 'group1', '{}'],
-    ['2024-01-15T11:00:00Z', 'update_item', 'item', 'user1', 'acc1', 'ws1', 'Workspace A', 'board1', 'Board 1', 'item1', 'Item 1', 'col1', 'Status', 'group1', '{}'],
-    ['2024-01-16T09:00:00Z', 'create_item', 'item', 'user1', 'acc1', 'ws2', 'Workspace B', 'board2', 'Board 2', 'item2', 'Item 2', null, null, 'group2', '{}'],
-    ['2024-01-16T10:00:00Z', 'create_item', 'item', 'user2', 'acc1', 'ws1', 'Workspace A', 'board1', 'Board 1', 'item3', 'Item 3', null, null, 'group1', '{}'],
-    ['2024-01-16T11:00:00Z', 'update_item', 'item', 'user2', 'acc1', 'ws1', 'Workspace A', 'board1', 'Board 1', 'item3', 'Item 3', 'col1', 'Status', 'group1', '{}'],
-    ['2024-01-17T08:00:00Z', 'delete_item', 'item', 'user1', 'acc1', 'ws1', 'Workspace A', 'board1', 'Board 1', 'item1', 'Item 1', null, null, 'group1', '{}'],
-    ['2024-01-17T09:00:00Z', 'create_item', 'item', 'user3', 'acc1', 'ws1', 'Workspace A', 'board3', 'Board 3', 'item4', 'Item 4', null, null, 'group3', '{}'],
+    ['2024-01-15T10:00:00Z', 'create_pulse', 'item', 'user1', 'acc1', 'ws1', 'Workspace A', 'board1', 'Board 1', 'item1', 'Item 1', null, null, 'group1', '{}'],
+    ['2024-01-15T11:00:00Z', 'update_column_value', 'item', 'user1', 'acc1', 'ws1', 'Workspace A', 'board1', 'Board 1', 'item1', 'Item 1', 'col1', 'Status', 'group1', '{}'],
+    ['2024-01-16T09:00:00Z', 'create_pulse', 'item', 'user1', 'acc1', 'ws2', 'Workspace B', 'board2', 'Board 2', 'item2', 'Item 2', null, null, 'group2', '{}'],
+    ['2024-01-16T10:00:00Z', 'create_pulse', 'item', 'user2', 'acc1', 'ws1', 'Workspace A', 'board1', 'Board 1', 'item3', 'Item 3', null, null, 'group1', '{}'],
+    ['2024-01-16T11:00:00Z', 'update_column_value', 'item', 'user2', 'acc1', 'ws1', 'Workspace A', 'board1', 'Board 1', 'item3', 'Item 3', 'col1', 'Status', 'group1', '{}'],
+    ['2024-01-17T08:00:00Z', 'delete_pulse', 'item', 'user1', 'acc1', 'ws1', 'Workspace A', 'board1', 'Board 1', 'item1', 'Item 1', null, null, 'group1', '{}'],
+    ['2024-01-17T09:00:00Z', 'create_pulse', 'item', 'user3', 'acc1', 'ws1', 'Workspace A', 'board3', 'Board 3', 'item4', 'Item 4', null, null, 'group3', '{}'],
   ];
 
   for (const row of testData) {

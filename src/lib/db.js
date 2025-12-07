@@ -15,6 +15,10 @@ export function getDb() {
   return db;
 }
 
+export function setDb(database) {
+  db = database;
+}
+
 export function closeDb() {
   if (db) {
     db.close();

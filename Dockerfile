@@ -19,12 +19,12 @@ RUN npm ci
 # Copy source
 COPY . .
 
-# Fetch the database from upstream release
-RUN ./scripts/fetch-db.sh
+# Create db directory (db fetched at runtime)
+RUN mkdir -p db
 
 # Expose port
 ENV PORT=3000
 EXPOSE 3000
 
-# Run HTTP server
-CMD ["npm", "run", "start:http"]
+# Fetch db at startup, then run server
+CMD ["sh", "-c", "./scripts/fetch-db.sh && npm run start:http"]

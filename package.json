@@ -1,0 +1,21 @@
+{
+  "name": "monday-activity-mcp",
+  "version": "0.1.0",
+  "description": "MCP server exposing tools for AI to query and analyze Monday.com activity data",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test tests/**/*.test.js",
+    "fetch-db": "bash scripts/fetch-db.sh"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "better-sqlite3": "^11.0.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

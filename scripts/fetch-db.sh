@@ -28,8 +28,16 @@ elif [ -n "${GITHUB_TOKEN:-}" ]; then
   RELEASE_INFO=$(curl -sL -H "Authorization: token $GITHUB_TOKEN" \
     "https://api.github.com/repos/$REPO/releases/latest")
 
-  # Get the asset API URL (not browser URL) for proper auth
-  ASSET_URL=$(echo "$RELEASE_INFO" | grep -o '"url": *"[^"]*assets/[^"]*"' | grep monday | head -1 | cut -d'"' -f4)
+  # Get the monday.db asset API URL (not browser URL) for proper auth
+  # Look for the asset with name "monday.db" and get its API url
+  ASSET_URL=$(echo "$RELEASE_INFO" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+for asset in data.get('assets', []):
+    if asset.get('name') == 'monday.db':
+        print(asset.get('url'))
+        break
+")
 
   if [ -z "$ASSET_URL" ]; then
     echo "Error: Could not find monday.db asset in latest release"

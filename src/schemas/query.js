@@ -1,13 +1,13 @@
 import { z } from 'zod';
 
-const DISALLOWED_KEYWORDS = [
-  'INSERT',
-  'UPDATE',
-  'DELETE',
-  'DROP',
-  'CREATE',
-  'ALTER',
-  'TRUNCATE',
+const DISALLOWED_PATTERNS = [
+  /\bINSERT\b/,
+  /\bUPDATE\b/,
+  /\bDELETE\b/,
+  /\bDROP\b/,
+  /\bCREATE\b/,
+  /\bALTER\b/,
+  /\bTRUNCATE\b/,
 ];
 
 export const RunQueryInputSchema = z.object({
@@ -17,8 +17,8 @@ export const RunQueryInputSchema = z.object({
       if (!upper.startsWith('SELECT')) {
         return false;
       }
-      for (const keyword of DISALLOWED_KEYWORDS) {
-        if (upper.includes(keyword)) {
+      for (const pattern of DISALLOWED_PATTERNS) {
+        if (pattern.test(upper)) {
           return false;
         }
       }

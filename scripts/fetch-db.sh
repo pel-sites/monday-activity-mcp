@@ -28,15 +28,21 @@ elif [ -n "${GITHUB_TOKEN:-}" ]; then
   RELEASE_INFO=$(curl -sL -H "Authorization: token $GITHUB_TOKEN" \
     "https://api.github.com/repos/$REPO/releases/latest")
 
-  DOWNLOAD_URL=$(echo "$RELEASE_INFO" | grep -o '"browser_download_url": *"[^"]*monday.db"' | cut -d'"' -f4)
+  # Get the asset API URL (not browser URL) for proper auth
+  ASSET_URL=$(echo "$RELEASE_INFO" | grep -o '"url": *"[^"]*assets/[^"]*"' | grep monday | head -1 | cut -d'"' -f4)
 
-  if [ -z "$DOWNLOAD_URL" ]; then
-    echo "Error: Could not find monday.db in latest release"
+  if [ -z "$ASSET_URL" ]; then
+    echo "Error: Could not find monday.db asset in latest release"
+    echo "Release info: $RELEASE_INFO"
     exit 1
   fi
 
-  echo "Downloading from: $DOWNLOAD_URL"
-  curl -L -H "Authorization: token $GITHUB_TOKEN" -o "$DB_DIR/monday.db" "$DOWNLOAD_URL"
+  echo "Downloading from API: $ASSET_URL"
+  curl -L \
+    -H "Authorization: token $GITHUB_TOKEN" \
+    -H "Accept: application/octet-stream" \
+    -o "$DB_DIR/monday.db" \
+    "$ASSET_URL"
 else
   echo "Error: No authentication available (need gh CLI or GITHUB_TOKEN)"
   exit 1

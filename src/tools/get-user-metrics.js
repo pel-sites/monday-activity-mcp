@@ -1,6 +1,8 @@
 import { getDb } from '../lib/db.js';
+import { getUserName, isActiveUser } from '../lib/users.js';
 
-export function getUserMetrics() {
+export function getUserMetrics(options = {}) {
+  const { activeOnly = false } = options;
   const db = getDb();
 
   const usersData = db
@@ -21,7 +23,12 @@ export function getUserMetrics() {
     )
     .all();
 
-  const users = usersData.map((user, _, arr) => {
+  let filteredUsers = usersData;
+  if (activeOnly) {
+    filteredUsers = usersData.filter((user) => isActiveUser(user.user_id));
+  }
+
+  const users = filteredUsers.map((user, _, arr) => {
     const metrics = {
       total_actions: user.total_actions,
       items_created: user.items_created,
@@ -38,8 +45,11 @@ export function getUserMetrics() {
       boards_touched: computeRank(arr, user, 'boards_touched'),
     };
 
+    const userName = getUserName(user.user_id);
+
     return {
       user_id: user.user_id,
+      user_name: userName,
       metrics,
       rankings,
     };

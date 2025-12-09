@@ -18,6 +18,7 @@ export const UserRankingsSchema = z.object({
 
 export const UserWithMetricsSchema = z.object({
   user_id: z.string(),
+  user_name: z.string().nullable(),
   metrics: UserMetricsSchema,
   rankings: UserRankingsSchema,
 });

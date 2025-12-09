@@ -69,6 +69,7 @@
  * Single user with metrics and rankings
  * @typedef {Object} UserWithMetrics
  * @property {string} user_id
+ * @property {string|null} user_name
  * @property {UserMetrics} metrics
  * @property {UserRankings} rankings
  */

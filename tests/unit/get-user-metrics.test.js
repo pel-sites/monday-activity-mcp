@@ -4,6 +4,7 @@ import { setDb, closeDb } from '../../src/lib/db.js';
 import { getUserMetrics } from '../../src/tools/get-user-metrics.js';
 import { GetUserMetricsResponseSchema } from '../../src/schemas/index.js';
 import { createTestDb, seedTestData } from '../fixtures/test-db.js';
+import { setUsersData, resetUsers } from '../../src/lib/users.js';
 
 describe('getUserMetrics', () => {
   let testDb;
@@ -12,10 +13,12 @@ describe('getUserMetrics', () => {
     testDb = createTestDb();
     seedTestData(testDb);
     setDb(testDb);
+    resetUsers();
   });
 
   afterEach(() => {
     closeDb();
+    resetUsers();
   });
 
   describe('basic functionality', () => {
@@ -35,6 +38,13 @@ describe('getUserMetrics', () => {
       const result = getUserMetrics();
       for (const user of result.users) {
         assert.ok(user.user_id);
+      }
+    });
+
+    it('includes user_name property for each user', () => {
+      const result = getUserMetrics();
+      for (const user of result.users) {
+        assert.ok('user_name' in user);
       }
     });
 
@@ -156,6 +166,59 @@ describe('getUserMetrics', () => {
           result.users[i].metrics.total_actions >= result.users[i + 1].metrics.total_actions
         );
       }
+    });
+  });
+
+  describe('user names', () => {
+    it('returns user_name when user mapping exists', () => {
+      setUsersData({ user1: 'Test User One', user2: 'Test User Two' });
+      const result = getUserMetrics();
+      const user1 = result.users.find((u) => u.user_id === 'user1');
+      const user2 = result.users.find((u) => u.user_id === 'user2');
+      assert.strictEqual(user1.user_name, 'Test User One');
+      assert.strictEqual(user2.user_name, 'Test User Two');
+    });
+
+    it('returns null for user_name when no mapping exists', () => {
+      setUsersData({});
+      const result = getUserMetrics();
+      for (const user of result.users) {
+        assert.strictEqual(user.user_name, null);
+      }
+    });
+  });
+
+  describe('activeOnly filter', () => {
+    it('returns all users when activeOnly is false', () => {
+      setUsersData({ user1: 'Test User One' });
+      const result = getUserMetrics({ activeOnly: false });
+      assert.strictEqual(result.userCount, 3);
+    });
+
+    it('returns only active users when activeOnly is true', () => {
+      setUsersData({ user1: 'Test User One', user3: 'Test User Three' });
+      const result = getUserMetrics({ activeOnly: true });
+      assert.strictEqual(result.userCount, 2);
+      const userIds = result.users.map((u) => u.user_id);
+      assert.ok(userIds.includes('user1'));
+      assert.ok(userIds.includes('user3'));
+      assert.ok(!userIds.includes('user2'));
+    });
+
+    it('returns empty array when no active users', () => {
+      setUsersData({});
+      const result = getUserMetrics({ activeOnly: true });
+      assert.strictEqual(result.userCount, 0);
+      assert.deepStrictEqual(result.users, []);
+    });
+
+    it('recalculates rankings for filtered users', () => {
+      setUsersData({ user1: 'Test User One', user3: 'Test User Three' });
+      const result = getUserMetrics({ activeOnly: true });
+      const user1 = result.users.find((u) => u.user_id === 'user1');
+      const user3 = result.users.find((u) => u.user_id === 'user3');
+      assert.strictEqual(user1.rankings.total_actions, 1);
+      assert.strictEqual(user3.rankings.total_actions, 2);
     });
   });
 });

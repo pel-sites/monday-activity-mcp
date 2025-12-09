@@ -159,6 +159,7 @@ describe('GetUserMetricsResponseSchema', () => {
       users: [
         {
           user_id: '12345',
+          user_name: 'Test User',
           metrics: {
             total_actions: 150,
             items_created: 45,
@@ -197,6 +198,7 @@ describe('GetUserMetricsResponseSchema', () => {
       users: [
         {
           user_id: '12345',
+          user_name: 'Test User',
           metrics: {
             total_actions: 150,
             items_created: 45,
@@ -225,6 +227,7 @@ describe('GetUserMetricsResponseSchema', () => {
       users: [
         {
           user_id: '12345',
+          user_name: 'Test User',
           metrics: {
             total_actions: -1,
             items_created: 45,

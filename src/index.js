@@ -51,10 +51,16 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: 'get_user_metrics',
         description:
-          'Returns comparative metrics for all users with rankings across total actions, items created, days active, workspaces touched, and boards touched.',
+          'Returns comparative metrics for all users with rankings across total actions, items created, days active, workspaces touched, and boards touched. Includes user names when available.',
         inputSchema: {
           type: 'object',
-          properties: {},
+          properties: {
+            activeOnly: {
+              type: 'boolean',
+              description:
+                'If true, only include users who are currently active in the Monday.com account. Default: false.',
+            },
+          },
           required: [],
         },
       },
@@ -79,7 +85,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       };
     }
     case 'get_user_metrics': {
-      const result = getUserMetrics();
+      const result = getUserMetrics(args);
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
       };
